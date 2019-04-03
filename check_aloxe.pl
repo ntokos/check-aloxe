@@ -353,7 +353,7 @@ sub check_terminals  {
       }
    }
 
-   my ($nterms, $nterms_ok, $ntermtypes) = (0, 0);
+   my ($nterms, $nterms_ok, $ntermtypes) = (0, 0, 0);
    $p_out = "";
 
    foreach my $k (sort keys %$termtypes_all) {
