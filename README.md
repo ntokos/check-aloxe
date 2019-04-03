@@ -147,5 +147,5 @@ apply Service "Terminals" {
 ```
 
 ## Note
-<b>Due to limited time, my response to requests, questions, comments will be very limited.</b>
-<br>I encourage you to improve it to fit your needs 
+__Due to lack of available time, I will probably not respond to any requests, while my response to questions and comments will be very limited.__
+_I encourage you to improve this plugin to fit your needs and fix any issues/bugs you find_ 
