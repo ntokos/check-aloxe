@@ -1,3 +1,6 @@
+## Description
+check-aloxe is a plugin written in Perl for use with Icinga/Nagios to check status and report statistics on Alcatel OmniPCX Enterprise PBXs.
+
 ## Compatibility
 - The plugin was written and tested for Icinga2 v.2.8, 2.9. It probably works on Nagios/Icinga1 too.
 - It is tested for Alcatel OXE Releases 5, 6 and 8.
@@ -14,7 +17,7 @@ The plugin establishes a telnet connection to the PBX and then issues one of the
 
 ## Install
 - Just copy the `check_aloxe.pl` file inside your (local) plugins directory.
-- You will then need to create a host configuration with the apropprirate variables, a command and the needed services. A guide for how you can do these in Icinga2 is given below.
+- You will then need to create a host configuration with the apropprirate variables, a command and the needed services. See the guide on  [how you can do these in Icinga2](#how-to-use-in-icinga2).
 
 ## How to use
 You can run it (via command line) with the -h or --help option to see a short help.
