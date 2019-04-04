@@ -31,7 +31,7 @@ Note that on some PBXs (with old CPUs) the telnet session might not respond in t
 ### How to use in Icinga2
 1. Create a hosts configuration file (e.g. a `pbx.conf` file inside your icinga2 `conf.d` directory).
 For each of your PBXs create a host declaration similar (but not limited) to this:
-```ruby
+```processing
 object Host "mypbx1" {
    import "generic-host"
 
@@ -69,7 +69,7 @@ object Host "mypbx1" {
 }
 ```
 2. Now create a command (e.g. inside your `commands.conf` file) like this:
-```
+```processing
 // Command to check Alcatel OXE PBXs
 object CheckCommand "aloxe" {
     import "plugin-check-command"
@@ -93,7 +93,7 @@ object CheckCommand "aloxe" {
 3. Then create a number of services that use the command on the hosts. In Icinga2 these is much easy to do by using apply rules.
 Here are some examples:
 - create services to check couplers status for each desired crystal:
-```
+```processing
 apply Service "crystal-" for (crystal => c_conf in host.vars.crystals) {
    import "generic-service"
  
@@ -107,7 +107,7 @@ apply Service "crystal-" for (crystal => c_conf in host.vars.crystals) {
  }
 ```
 - create services to report channel usage statistics for each trunk group:
-```
+```processing
 apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
    import "generic-service"
  
@@ -120,7 +120,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
  }
 ```
 - create services to report channel usage statistics for each link:
-```
+```processing
  apply Service "link-" for (l_num => l_conf in host.vars.links) {
    import "generic-service"
  
@@ -135,7 +135,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
 }
 ```
 - create services to report terminal status statistics for each PBX:
-```
+```processing
 apply Service "terminals" {
    import "uoi-service-long"
  
