@@ -90,7 +90,7 @@ object CheckCommand "aloxe" {
     vars.aloxe_timeout = 20
 }
 ```
-3.Then create a number of services that use the command on the hosts. In Icinga2 these is much easy to do by using apply rules.
+3. Then create a number of services that use the command on the hosts. In Icinga2 these is much easy to do by using apply rules.
 Here are some examples:
 - create services to check couplers status for each desired crystal:
 ```
@@ -109,7 +109,7 @@ apply Service "crystal-" for (crystal => c_conf in host.vars.crystals) {
 - create services to report channel usage statistics for each trunk group:
 ```
 apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
-   import "uoi-service"
+   import "generic-service"
  
    check_command = "aloxe"
  
@@ -122,7 +122,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
 - create services to report channel usage statistics for each link:
 ```
  apply Service "link-" for (l_num => l_conf in host.vars.links) {
-   import "uoi-service"
+   import "generic-service"
  
    check_command = "aloxe"
  
@@ -136,7 +136,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
 ```
 - create services to report terminal status statistics for each PBX:
 ```
-apply Service "Terminals" {
+apply Service "terminals" {
    import "uoi-service-long"
  
    check_command = "aloxe"
