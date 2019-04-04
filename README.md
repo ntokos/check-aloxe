@@ -214,8 +214,17 @@ apply Service "terminals" {
 } 
 ```
 
+## Possible future additions
+####Implementation
+- Add *ssh* as method of connecting to a PBX (using system call), possibly via command line option. Or even throw away telnet option alltogether.
+- Add a mode to display status of remote crystals connected in a coupler
+- Add a mode to display crystal topology information
+- Add the ability to specify warning/critical thresholds for channel usage in links and trunk groups.
 
-## Note
-__Due to lack of available time, I will probably not respond to any requests, while my response to questions and comments will be very limited.__
+#### Goodies
+- Describe how to configure a NagVis map to show the PBXs and the links interconnecting them.
 
-_I encourage you to improve this plugin to fit your needs and fix any issues/bugs you find_ 
+## Notes
+*Due to lack of available time, I will probably not respond to any requests, while my response to questions and comments will be very limited.*
+
+This is a pretty amateur effort in perl programming. _I encourage you to improve this plugin to make it better, fit your needs and fix any issues/bugs you find_
