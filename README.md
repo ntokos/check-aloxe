@@ -31,7 +31,7 @@ Note that on some PBXs (with old CPUs) the telnet session might not respond in t
 ### How to use in Icinga2
 1. Create a hosts configuration file (e.g. a `pbx.conf` file inside your icinga2 `conf.d` directory).
 For each of your PBXs create a host declaration similar (but not limited) to this:
-```
+```ruby
 object Host "mypbx1" {
    import "generic-host"
 
