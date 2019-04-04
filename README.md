@@ -1,5 +1,13 @@
 ## Description
-check-aloxe is a plugin written in Perl for use with Icinga/Nagios to check status and report statistics on Alcatel OmniPCX Enterprise PBXs.
+check-aloxe is a plugin written in Perl for use with Icinga/Nagios to check status and report statistics on Alcatel OmniPCX Enterprise (OXE) PBXs.
+
+It connects (currently only via telnet) to an Alcatel OXE PBX and reports:
+ - coupler (i.e. cards) service status for a given crystal number and a user specified list of coupler types or a 
+   given coupler number
+ - terminal (i.e. phones, faxes etc) status statistics for the PBX or a specific crystal number
+ - trunk group channel usage statistics (Free vs non Free channels) for a given trunk group number
+ - link channel usage statistics (Free vs non Free channels) for a given pair of crystal number/coupler number
+The output includes some basic performance data in format understood by icinga/nagios.
 
 ## Compatibility
 - The plugin was written and tested for Icinga2 v.2.8, 2.9. It probably works on Nagios/Icinga1 too.
@@ -20,7 +28,17 @@ The plugin establishes a telnet connection to the PBX and then issues one of the
 - You will then need to create a host configuration with the apropprirate variables, a command and the needed services. See the guide on  [how you can do these in Icinga2](#how-to-use-in-icinga2).
 
 ## How to use
-You can run it (via command line) with the -h or --help option to see a short help.
+You can always run it (via command line) with the `-h` or `--help` option to see the help text.
+
+Here is a more detailed explanation of the command options and things to be aware of:
+
+ | Option | Value | Description |
+ | :--- | :---: | :--- |
+ | `-H\|--host` | *IPv4 addr string* | IP address of the PBX management interface |
+ | `-m\|--mode` | *String* | What mode the plugin should run on (i.e. what to check): |
+ |   | 'coupler' | Checks the status of couplers in a given crystal number. If you provide a list of coupler types (option `-y`) only those coupler types will be checked. If you provide a coupler number (option `-c`) only that coupler will be checked. The performance data contain status numbers per coupler type (value=couplers of this type that are IN SERVICE;warn=0;crit=0;min=0;max=total couplers of this type) |
+ | `-t\|--timeout` | *Integer*| Set plugin timeout in secs (currenly this only affects the telnet timeout, see below |
+ | `-v\|--verbose` |  | Print verbose information (currently only one verbose level is implemented) |
 
 #### Timeouts
 The telnet timeout is set to 2secs less than the plugin timeout. The default plugin timeout is 15 secs (setting telnet timeout to 13secs).
