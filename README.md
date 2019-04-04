@@ -87,11 +87,12 @@ object CheckCommand "aloxe" {
  
     vars.aloxe_address = "$address$"
     vars.aloxe_mode = "coupler"
+    vars.aloxe_timeout = 20
 }
 ```
 3.Then create a number of services that use the command on the hosts. In Icinga2 these is much easy to do by using apply rules.
 Here are some examples:
--create services to check couplers status for each desired crystal:
+- create services to check couplers status for each desired crystal:
 ```
 apply Service "crystal-" for (crystal => c_conf in host.vars.crystals) {
    import "generic-service"
@@ -105,7 +106,7 @@ apply Service "crystal-" for (crystal => c_conf in host.vars.crystals) {
    assign where host.address && host.vars.crystals && host.vars.monitorcouplers && c_conf.monitor
  }
 ```
--create services to report channel usage statistics for each trunk group:
+- create services to report channel usage statistics for each trunk group:
 ```
 apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
    import "uoi-service"
@@ -118,7 +119,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
    assign where host.address && host.vars.trkgroups && t_conf.monitor
  }
 ```
--create services to report channel usage statistics for each link:
+- create services to report channel usage statistics for each link:
 ```
  apply Service "link-" for (l_num => l_conf in host.vars.links) {
    import "uoi-service"
@@ -133,7 +134,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
    assign where host.address && host.vars.links && l_conf.monitor
 }
 ```
--create services to report terminal status statistics for each PBX:
+- create services to report terminal status statistics for each PBX:
 ```
 apply Service "Terminals" {
    import "uoi-service-long"
