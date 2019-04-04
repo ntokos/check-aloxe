@@ -94,7 +94,7 @@ TG 1: PSTN-OUT OK - 20 Free channels | NonFree=10;30;0;0;30
 
 
 ### How to use in Icinga2
-1. Create a hosts configuration file (e.g. a `pbx.conf` file inside your icinga2 `conf.d` directory).
+1. Create a hosts configuration file (e.g. a *pbx.conf* file inside your icinga2 *conf.d* directory).
 For each of your PBXs create a host declaration similar (but not limited) to this:
 ```processing
 object Host "mypbx1" {
@@ -133,7 +133,7 @@ object Host "mypbx1" {
    ...
 }
 ```
-2. Now create a command (e.g. inside your `commands.conf` file) like this:
+2. Now create a command (e.g. inside your *commands.conf* file) like this:
 ```processing
 // Command to check Alcatel OXE PBXs
 object CheckCommand "aloxe" {
@@ -155,7 +155,9 @@ object CheckCommand "aloxe" {
     vars.aloxe_timeout = 20
 }
 ```
-3. Then create a number of services that use the command on the hosts. In Icinga2 these is much easy to do by using apply rules.
+3. Then create a number of services (e.g. inside your *services.conf* file) that use the command on the hosts.
+In Icinga2 this is much easy to do by using apply rules.
+
 Here are some examples:
 - create services to check couplers status for each desired crystal:
 ```processing
@@ -202,7 +204,7 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
 - create services to report terminal status statistics for each PBX:
 ```processing
 apply Service "terminals" {
-   import "uoi-service-long"
+   import "generic-service"
  
    check_command = "aloxe"
  
@@ -211,6 +213,7 @@ apply Service "terminals" {
    assign where host.address && host.vars.monitorterminals
 } 
 ```
+
 
 ## Note
 __Due to lack of available time, I will probably not respond to any requests, while my response to questions and comments will be very limited.__
