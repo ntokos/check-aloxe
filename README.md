@@ -34,11 +34,11 @@ Here is a more detailed explanation of the command options and things to be awar
 
  | Option | Value | Description |
  | :--- | :---: | :--- |
- | `-H\|--host` | *IPv4 addr string* | IP address of the PBX management interface |
- | `-m\|--mode` | *String* | What mode the plugin should run on (i.e. what to check): |
- |   | 'coupler' | Checks the status of couplers in a given crystal number. If you provide a list of coupler types (option `-y`) only those coupler types will be checked. If you provide a coupler number (option `-c`) only that coupler will be checked. The performance data contain status numbers per coupler type (value=couplers of this type that are IN SERVICE;warn=0;crit=0;min=0;max=total couplers of this type) |
- | `-t\|--timeout` | *Integer*| Set plugin timeout in secs (currenly this only affects the telnet timeout, see below |
- | `-v\|--verbose` |  | Print verbose information (currently only one verbose level is implemented) |
+ | `-H,--host` | *IPv4 addr string* | IP address of the PBX management interface |
+ | `-m,--mode` | *String* | What mode the plugin should run on (i.e. what to check): |
+ |   | 'coupler' | Checks the status of couplers in a given crystal number.<br>If you provide a list of coupler types (option `-y`) only those coupler types will be checked.<br>If you provide a coupler number (option `-c`) only that coupler will be checked.<br>Couplers in state IN SERVICE are considered OK, those in state OUT OF SERVICE are reported as CRITICAL and those that are not in states REG NOT INIT, MISSING MAO FILE, MISSING OPS FILE are reported with WARNING.<br>The plugin reports only CRITICAL/WARNING couplers.<br>The performance data contain status numbers per coupler type (value=couplers of this type that are OK;warn=0;crit=0;min=0;max=total couplers of this type) |
+ | `-t,--timeout` | *Integer*| Set plugin timeout in secs (currenly this only affects the telnet timeout, see below |
+ | `-v,--verbose` |  | Print verbose information (currently only one verbose level is implemented) |
 
 #### Timeouts
 The telnet timeout is set to 2secs less than the plugin timeout. The default plugin timeout is 15 secs (setting telnet timeout to 13secs).
