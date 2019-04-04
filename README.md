@@ -149,4 +149,5 @@ apply Service "terminals" {
 
 ## Note
 __Due to lack of available time, I will probably not respond to any requests, while my response to questions and comments will be very limited.__
+
 _I encourage you to improve this plugin to fit your needs and fix any issues/bugs you find_ 
