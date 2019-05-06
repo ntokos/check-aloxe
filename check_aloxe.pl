@@ -37,9 +37,9 @@ use File::Basename;
 $PROGNAME = basename($0);
 
 
-my $usage = "Usage: %s [-v|--verbose] [-t|--timeout <timeout>] -H|--host <host> -m|--mode <mode>
-       ( [-i|--crystal <crystal>] [-y|--ctype <coupler types>] | [-c|--coupler] [-r|--rdescr
-         <remote pbx description] ) | [-g|--trkgroup <trunk group>] [-h|--help]
+my $usage = "Usage: %s [-h] [-v] [-t] -H <host> -m <mode>
+           ( [-i <crystal>] [-y <coupler types>] | [-c] [-r <remote pbx description] ) |
+           [-g <trunk group>] 
 ";
 my $blurb = "This plugin connects to an Alcatel OXE PBX and reports:
  - coupler (i.e. cards) service status for a given crystal and a list of coupler types or a 
@@ -94,7 +94,7 @@ $plugin->add_arg(
 $help_txt = "-m, --mode STRING
    a keyword to specify what to check:
 \tcoupler\t\tPBX card service status for the given crystal
-\link\t\ttlink channel statistics for the given crystal-coupler numbers
+\tlink\t\tlink channel statistics for the given crystal-coupler numbers
 \tterminal\ttotal terminal status statistics for the PBX
 \ttrunk\t\ttrunk channel statistics for the given trunk group number";
 
