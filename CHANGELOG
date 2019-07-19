@@ -2,3 +2,7 @@ Change Log for the check-aloxe plugin:
 
 1.1     (06 May 2019)
         Initial plugin release
+
+1.2     (12 Jul 2019)
+        - Fix error in checking minimum timeout
+        - Set a more generic prompt in telnet
