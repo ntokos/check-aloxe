@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-###  check_aloxe.pl, version: 1.1, 4 Apr 2019
+###  check_aloxe.pl, version: 1.2, 12 Jul 2019
 # 
 # Copyright: C. Ntokos, UoI NOC, Greece
 #
@@ -557,9 +557,9 @@ if ($plugin->opts->verbose) {
 
 # Open telnet session
 my $telnet = new Net::Telnet(
-                Timeout => $plugin->opts->timeout > 10 ? 10 : $plugin->opts->timeout - 2,
+                Timeout => $plugin->opts->timeout < 4 ? 3 : $plugin->opts->timeout - 2,
                 Errmode => 'return',
-                Prompt => '/\(\d\d\d\)xa00\d\d\d> $/'
+                Prompt => '/\(\d+\).+> $/'
 );
 
 printf("Connecting to host %s\n", $plugin->opts->host) if $plugin->opts->verbose;
