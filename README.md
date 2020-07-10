@@ -37,7 +37,7 @@ Here is a more detailed explanation of the command options and things to be awar
  | `-H,--host` | *IPv4 addr string* | IP address of the PBX management interface |
  | `-m,--mode` | *String* | What mode the plugin should run on (i.e. what to check): |
  |   | 'coupler' | Checks the status of couplers in a given crystal number.<br>If you provide a list of coupler types (option `-y`) only those coupler types will be checked.<br>If you provide a coupler number (option `-c`) only that coupler will be checked.<br>Couplers in state 'IN SERVICE' are considered OK, those in state 'OUT OF SERVICE' are reported as CRITICAL and those that are *not* in states similar to 'REG NOT INIT', 'MISS MAO FILE', 'MISS OPS FILE' are reported with WARNING.<br>The plugin output includes only the CRITICAL/WARNING couplers (otherwise it reports total number of OK couplers).<br>The performance data contain status totals per coupler type (value=couplers of this type that are OK;warn=0;crit=0;min=0;max=total couplers of this type) |
- |   | 'link' | Check the channel usage on the link designated by a given crystal/coupler pair (specified via the `-i`, `-c` options) and report total Free channels.<br>A channel state of value different than 'F' is considered non-Free.<br>In the current plugin version, there is no way to specify warning/critical thresholds. When *all* link channels are non-Free, the plugin will report a WARNING status.<br>You can provide a text (via the `-r-` option) describing the PBX on the otherside of the link that will be added on the plugin output (useful as a place to store the crystal/coupler pair of the remote PBX).<br>The performance data contain the number of *non* Free channels (value=total non Free channels;warn=total channels;crit=0;min=0;max=total channels) |
+ |   | 'link' | Check the channel usage on the link designated by a given crystal/coupler pair (specified via the `-i`, `-c` options) and report Busy vs total channels.<br>A channel state of value different than 'F' is considered Busy.<br>In the current plugin version, there is no way to specify warning/critical thresholds. When *all* link channels are Busy, the plugin will report a WARNING status.<br>You can provide a text (via the `-r-` option) describing the PBX on the otherside of the link that will be added on the plugin output (useful as a place to store the crystal/coupler pair of the remote PBX).<br>The performance data contain the number of *non* Free channels (value=total non Free channels;warn=total channels;crit=0;min=0;max=total channels). It also contains in and out parameters (same values) so you can create weathermap lines in Nagvis. |
  |   | 'terminal' | Checks the status of the terminals on the PBX.<br>If the option `-i` is provided, then only the terminals on the given crystal number will be checked.<br>The plugin will report the number of different terminal types, the total number of terminals that are OK and total number of terminals that are not OK (based on the flags of the last column of PBX command 'listerm')<br>The performance data contain total status numbers per terminal type (value=total terminals of this type that are OK;warn=0;crit=0;min=0;max=total terminals of this type) |
  |   | 'trunk' | Check, similarly to mode 'link', channel usage on a trunk group.<br>The trunk group is specified with its number (via option `-g`) rather than crystal/coupler numbers pair.<br>The plugin output, instead of the given remote pbx, will contain the configured name of the trunk group. |
  | `-i,--crystal` | *Integer* | Perform check on the given crystal number |
@@ -69,12 +69,12 @@ Couplers OK - All 1 couplers OK | INTOF_A=1;0;0;0;1
 - Check channel usage on link designated by a given crystal/coupler numbers pair
 ```
 check_aloxe.pl -H 10.1.1.1 -m link -i 0 -c 11
-Link from: (0-11) OK - 28 Free channels | NonFree=2;30;0;0;30
+Link from: (0-11) OK - 28 Free channels | NonFree=2;30;0;0;30 in=2;0;0;0;30 out=2;0;0;0;30
 ```
 - Check channel usage link designated by a given crystal/coupler numbers pair, remote bpx has the given description
 ```
 check_aloxe.pl -H 10.1.1.1 -m link -i 0 -c 11 -r "mypbx2 (0-26)"
-Link from: (0-11) to: mypbx2 (0-26) OK - 28 Free channels | NonFree=2;30;0;0;30
+Link from: (0-11) to: mypbx2 (0-26) OK - 28 Free channels | NonFree=2;30;0;0;30 in=2;0;0;0;30 out=2;0;0;0;30
 ```
 - Check terminals status on the PBX
 ```
@@ -89,7 +89,7 @@ Terminals OK - 5 types, 262 total terminals, 232 OK, 30 not OK | 4012-LE=79;0;0;
 - Check channel usage statistics on trunk group number 1
 ```
 check_aloxe.pl -H 10.1.1.1 -m trunk -g 1
-TG 1: PSTN-OUT OK - 20 Free channels | NonFree=10;30;0;0;30
+TG 1: PSTN-OUT OK - 20 Free channels | NonFree=10;30;0;0;30 in=10;0;0;0;30 out=10;0;0;0;30
 ```
 
 
