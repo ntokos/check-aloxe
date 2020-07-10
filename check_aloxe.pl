@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-###  check_aloxe.pl, version: 1.2, 12 Jul 2019
+###  check_aloxe.pl, version: 1.3, 03 Jul 2020
 # 
 # Copyright: C. Ntokos, UoI NOC, Greece
 #
@@ -16,7 +16,12 @@
 # Possible future implementation:
 # - crystal topology info for a given PBX
 #
-##############################################################################
+# Changes:
+# v.1.3:
+#  - changed output on link and trunk modes to display Busy instead of Free Channels
+#  - added perfdata output values for link and trunk modes for creating weathermap lines
+#    in NagVis
+#############################################################################################
 
 use strict;
 use warnings;
@@ -31,7 +36,7 @@ use Net::Telnet ();
 
 use vars qw($VERSION $PROGNAME $verbose $timeout);
 
-$VERSION = '1.1';
+$VERSION = '1.3';
 
 use File::Basename;
 $PROGNAME = basename($0);
@@ -448,13 +453,16 @@ sub check_trunkgroup  {
    }
    else {
       if ($n_nonfree < $n_states) {
-         $plugin->add_message(OK, $n_states - $n_nonfree . " Free channels");
+         $plugin->add_message(OK, $n_nonfree . "/" . $n_states . " Busy channels");
       }
       else {
          $plugin->add_message(WARNING, "NO Free channels");
       }
 
       $p_out = "NonFree=" . $n_nonfree . ";" . $n_states . ";0;0;" . $n_states;
+      # add 'in' and 'out' as requested by NagVis weathermap lines
+      $p_out .= " in=" . $n_nonfree . ";;;0;" . $n_states;
+      $p_out .= " out=" . $n_nonfree . ";;;0;" . $n_states;
 
       ($cd, $msg) = $plugin->check_messages();
    }
@@ -518,13 +526,16 @@ sub check_link  {
    }
    else {
       if ($n_nonfree < $n_states) {
-         $plugin->add_message(OK, $n_states - $n_nonfree . " Free channels");
+         $plugin->add_message(OK, $n_nonfree . "/" . $n_states . " Busy channels");
       }
       else {
          $plugin->add_message(WARNING, "NO Free channels");
       }
 
       $p_out = "NonFree=" . $n_nonfree . ";" . $n_states . ";0;0;" . $n_states;
+      # add 'in' and 'out' as requested by NagVis weathermap lines
+      $p_out .= " in=" . $n_nonfree . ";;;0;" . $n_states;
+      $p_out .= " out=" . $n_nonfree . ";;;0;" . $n_states;
 
       ($cd, $msg) = $plugin->check_messages();
    }
