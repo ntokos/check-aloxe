@@ -7,11 +7,12 @@ It connects (currently only via telnet) to an Alcatel OXE PBX and reports:
  - terminal (i.e. phones, faxes etc) status statistics for the PBX or a specific crystal number
  - trunk group channel usage statistics (busy vs total channels) for a given trunk group number
  - link channel usage statistics (busy vs total channels) for a given pair of crystal number/coupler number
+ - application software identity (appid) information of the PBX
 The output includes some basic performance data in format understood by icinga/nagios.
 
 ## Compatibility
-- The plugin was written and tested for Icinga2 v.2.8, 2.9. It probably works on Nagios/Icinga1 too.
-- It is tested for Alcatel OXE Releases 5, 6 and 8.
+- The plugin was written and tested for Icinga2 v.2.8 to 2.11. It probably works on Nagios/Icinga1 too.
+- It is tested for Alcatel OXE Releases 5, 6, 8 and 11.
 
 ### Prerequisites
 - The plugin is built using the [Monitoring::Plugin](https://metacpan.org/pod/Monitoring::Plugin) Perl module.
@@ -22,6 +23,7 @@ The plugin establishes a telnet connection to the PBX and then issues one of the
 - `config`
 - `listerm`
 - `trkstat`
+- `appli_identication`
 
 ## Install
 - Just copy the `check_aloxe.pl` file inside your (local) plugins directory.
@@ -40,6 +42,7 @@ Here is a more detailed explanation of the command options and things to be awar
  |   | 'link' | Check the channel usage on the link designated by a given crystal/coupler pair (specified via the `-i`, `-c` options) and report Busy vs total channels.<br>A channel state of value different than 'F' is considered Busy.<br>In the current plugin version, there is no way to specify warning/critical thresholds. When *all* link channels are Busy, the plugin will report a WARNING status.<br>You can provide a text (via the `-r-` option) describing the PBX on the otherside of the link that will be added on the plugin output (useful as a place to store the crystal/coupler pair of the remote PBX).<br>The performance data contain the number of *non* Free channels (value=total non Free channels;warn=total channels;crit=0;min=0;max=total channels). It also contains in and out parameters (same values) so you can create weathermap lines in Nagvis. |
  |   | 'terminal' | Checks the status of the terminals on the PBX.<br>If the option `-i` is provided, then only the terminals on the given crystal number will be checked.<br>The plugin will report the number of different terminal types, the total number of terminals that are OK and total number of terminals that are not OK (based on the flags of the last column of PBX command 'listerm')<br>The performance data contain total status numbers per terminal type (value=total terminals of this type that are OK;warn=0;crit=0;min=0;max=total terminals of this type) |
  |   | 'trunk' | Check, similarly to mode 'link', channel usage on a trunk group.<br>The trunk group is specified with its number (via option `-g`) rather than crystal/coupler numbers pair.<br>The plugin output, instead of the given remote pbx, will contain the configured name of the trunk group. |
+ |   | 'appid' | Check and report the application software identity (i.e. the OXE software release info) of the PBX<br> |
  | `-i,--crystal` | *Integer* | Perform check on the given crystal number |
  | `-c,--coupler` | *Integer* | Perform check on the given coupler number (and the crystal given by option `-i`) |
  | `-y,--ctype` | *String* | A comma-separated list of coupler types that should be checked (valid only for mode 'coupler') |
@@ -91,6 +94,11 @@ Terminals OK - 5 types, 262 total terminals, 232 OK, 30 not OK | 4012-LE=79;0;0;
 check_aloxe.pl -H 10.1.1.1 -m trunk -g 1
 TG 1: PSTN-OUT OK - 20 Free channels | NonFree=10;30;0;0;30 in=10;0;0;0;30 out=10;0;0;0;30
 ```
+- Get the application software identity of the PBX
+```
+check_aloxe.pl -H 10.1.1.1 -m appid
+AppId OK - CPU:c7s2, release:8.0, delivery:g1.302, patch:8 (8.0-g1.302-8)
+```
 
 
 ### How to use in Icinga2
@@ -105,6 +113,8 @@ object Host "mypbx1" {
    vars.monitorcouplers = "CPU6,CPU7_STEP2,INTOF_A,INTOF_B,INTIPA,PRA2,UA32,NDDI"    # add more types
 
    vars.monitorterminals = true
+
+   vars.monitorrelease = true
 
    vars.crystals["0"] = { monitor = true }
    vars.crystals["1"] = { monitor = true }
@@ -211,6 +221,18 @@ apply Service "terminals" {
    vars.aloxe_mode = "terminal"
  
    assign where host.address && host.vars.monitorterminals
+} 
+```
+- create services to report application software identity for each PBX:
+```processing
+apply Service "appl-id" {
+   import "generic-service"
+ 
+   check_command = "aloxe"
+ 
+   vars.aloxe_mode = "appid"
+ 
+   assign where host.address && host.vars.monitorrelease
 } 
 ```
 

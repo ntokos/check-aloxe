@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-###  check_aloxe.pl, version: 1.3, 03 Jul 2020
+###  check_aloxe.pl, version: 2.0, 10 Jul 2020
 # 
 # Copyright: C. Ntokos, UoI NOC, Greece
 #
@@ -17,6 +17,9 @@
 # - crystal topology info for a given PBX
 #
 # Changes:
+# v.2.0:
+#  - added mode=appid that displays the Application software identity running on the PBX
+#  - removed overchecking for valid arguments
 # v.1.3:
 #  - changed output on link and trunk modes to display Busy instead of Free Channels
 #  - added perfdata output values for link and trunk modes for creating weathermap lines
@@ -36,22 +39,23 @@ use Net::Telnet ();
 
 use vars qw($VERSION $PROGNAME $verbose $timeout);
 
-$VERSION = '1.3';
+$VERSION = '2.0';
 
 use File::Basename;
 $PROGNAME = basename($0);
 
 
 my $usage = "Usage: %s [-h] [-v] [-t] -H <host> -m <mode>
-           ( [-i <crystal>] [-y <coupler types>] | [-c] [-r <remote pbx description] ) |
-           [-g <trunk group>] 
+       ([-i <crystal>] [-y <coupler types>] | [-c <coupler num>] [-r <remote pbx description]) |
+       [-g <trunk group>]
 ";
-my $blurb = "This plugin connects to an Alcatel OXE PBX and reports:
+my $blurb = "This plugin connects to an Alcatel OXE PBX and reports one of:
  - coupler (i.e. cards) service status for a given crystal and a list of coupler types or a 
    coupler number
  - terminal (i.e. phones, faxes etc) status statistics for the PBX
  - trunk group channel usage statistics for a given trunk group number
  - link channel usage statistics for a given pair of crystal and coupler
+ - application software identity that the PBX runs
 ";
 
 my $help_txt = "
@@ -101,7 +105,8 @@ $help_txt = "-m, --mode STRING
 \tcoupler\t\tPBX card service status for the given crystal
 \tlink\t\tlink channel statistics for the given crystal-coupler numbers
 \tterminal\ttotal terminal status statistics for the PBX
-\ttrunk\t\ttrunk channel statistics for the given trunk group number";
+\ttrunk\t\ttrunk channel statistics for the given trunk group number
+\tappid\t\tjust report the application software identity of the PBX";
 
 $plugin->add_arg(
            spec => 'mode|m=s',
@@ -162,10 +167,6 @@ $plugin->add_arg(
 
 sub check_extra_opts {
 
-   return "No host specified" if (! defined ($plugin->opts->host));
-
-   return "Option --mode is mandatory" if (! defined ($plugin->opts->mode));
-
    if ($plugin->opts->mode eq "coupler") {
       $plugin->shortname('Couplers');
 
@@ -174,36 +175,23 @@ sub check_extra_opts {
       if ((! defined ($plugin->opts->ctype)) && (! defined ($plugin->opts->coupler))) {
          return "Mode=coupler requires option --ctype or --coupler";
       }
-
-      return "Invalid option --trkgroup (-g) for mode=coupler" if (defined ($plugin->opts->trkgroup));
-      return "Invalid option --rdescr (-r) for mode=coupler" if (defined ($plugin->opts->rdescr));
    }
    elsif ($plugin->opts->mode eq "terminal") {
       $plugin->shortname('Terminals');
-
-      return "Invalid option --ctype (-y) for mode=terminal" if (defined ($plugin->opts->ctype));
-      return "Invalid option --coupler (-c) for mode=terminal" if (defined ($plugin->opts->coupler));
-      return "Invalid option --trkgroup (-g) for mode=terminal" if (defined ($plugin->opts->trkgroup));
-      return "Invalid option --rdescr (-r) for mode=terminal" if (defined ($plugin->opts->rdescr));
    }
    elsif ($plugin->opts->mode eq "trunk") {
       $plugin->shortname('Trunk');
 
       return "Mode=trunk requires option --trkgroup" if (! defined ($plugin->opts->trkgroup));
-
-      return "Invalid option --crystal (-i) for mode=trunk" if (defined ($plugin->opts->crystal));
-      return "Invalid option --ctype (-y) for mode=trunk" if (defined ($plugin->opts->ctype));
-      return "Invalid option --coupler (-c) for mode=trunk" if (defined ($plugin->opts->coupler));
-      return "Invalid option --rdescr (-r) for mode=trunk" if (defined ($plugin->opts->rdescr));
    }
    elsif ($plugin->opts->mode eq "link") {
       $plugin->shortname('Link');
 
       return "Mode=link requires option --crystal" if (! defined ($plugin->opts->crystal));
       return "Mode=link requires option --coupler" if (! defined ($plugin->opts->coupler));
-
-      return "Invalid option --ctype (-y) for mode=link" if (defined ($plugin->opts->ctype));
-      return "Invalid option --trkgroup (-g) for mode=link" if (defined ($plugin->opts->trkgroup));
+   }
+   elsif ($plugin->opts->mode eq "appid") {
+      $plugin->shortname('AppId');
    }
    else {
       $plugin->shortname($plugin->opts->mode);
@@ -460,7 +448,7 @@ sub check_trunkgroup  {
       }
 
       $p_out = "NonFree=" . $n_nonfree . ";" . $n_states . ";0;0;" . $n_states;
-      # add 'in' and 'out' as requested by NagVis weathermap lines
+      # add 'in' and 'out' as required by NagVis weathermap lines
       $p_out .= " in=" . $n_nonfree . ";;;0;" . $n_states;
       $p_out .= " out=" . $n_nonfree . ";;;0;" . $n_states;
 
@@ -533,7 +521,7 @@ sub check_link  {
       }
 
       $p_out = "NonFree=" . $n_nonfree . ";" . $n_states . ";0;0;" . $n_states;
-      # add 'in' and 'out' as requested by NagVis weathermap lines
+      # add 'in' and 'out' as required by NagVis weathermap lines
       $p_out .= " in=" . $n_nonfree . ";;;0;" . $n_states;
       $p_out .= " out=" . $n_nonfree . ";;;0;" . $n_states;
 
@@ -545,6 +533,57 @@ sub check_link  {
    return ($cd, $msg, $p_out);
 
 } # check_link
+
+
+sub check_appid  {
+   my @lines = @_;
+
+   my ($cd, $msg, $p_out) = (undef, undef, undef);
+   my ($appl_ids, $softw_id) = (undef, undef);
+  
+   printf("Checking application software id\n") if ($plugin->opts->verbose);
+         
+   for my $l (@lines) {
+      chomp($l);
+
+      $l =~ s/^\s+//;
+      next if (length($l) == 0);
+
+      my @f = split(/-/, $l);
+
+      next if ($#f < 4) || ($#f > 5);
+
+      printf("Found appid: %s\n", $l) if ($plugin->opts->verbose);
+      $f[0] =~ s/R//;
+      $$appl_ids{'rel'} = $f[0];
+      $$appl_ids{'del'} = $f[1];
+      $$appl_ids{'patch'} = $f[2];
+      if ($#f == 5) {
+         $$appl_ids{'patch'} .= $f[3];
+         shift(@f);
+      }
+      $$appl_ids{'cpu'} = $f[4];
+
+      $softw_id = join('-', $$appl_ids{'rel'}, $$appl_ids{'del'}, $$appl_ids{'patch'});
+   }
+
+   if (defined $appl_ids) {
+      my $a_rstr = "CPU:" . $$appl_ids{'cpu'} . ", release:". $$appl_ids{'rel'};
+      $a_rstr .= ", delivery:" . $$appl_ids{'del'} . ", patch:" . $$appl_ids{'patch'};
+      $a_rstr .= " (". $softw_id . ")";
+
+      $plugin->add_message(OK, $a_rstr);
+
+      ($cd, $msg) = $plugin->check_messages();
+   }
+   else {
+      $cd = UNKNOWN;
+      $msg = "No valid application software identity found";
+   }
+  
+   return ($cd, $msg, $p_out);
+
+} #check_appid
 
 
 # MAIN program
@@ -586,20 +625,22 @@ if (! $telnet->login($TELNET_USER, $TELNET_PASS)) {
 # Issue appropriate command to PBX
 my $tool_cmd = "";
 if ($plugin->opts->mode eq "coupler") {
-   $tool_cmd = "config";
+   $tool_cmd = "config " . $plugin->opts->crystal;
+   $tool_cmd .= " " . $plugin->opts->coupler if defined($plugin->opts->coupler);
 }
 elsif ($plugin->opts->mode eq "terminal") {
    $tool_cmd = "listerm";
+   $tool_cmd .= " " . $plugin->opts->crystal if defined($plugin->opts->crystal);
 }
 elsif ($plugin->opts->mode eq "link") {
-   $tool_cmd = "trkstat";
+   $tool_cmd = "trkstat " . $plugin->opts->crystal . " " . $plugin->opts->coupler;
 }
 elsif ($plugin->opts->mode eq "trunk") {
    $tool_cmd = "trkstat " . $plugin->opts->trkgroup;
 }
-
-$tool_cmd .= " " . $plugin->opts->crystal if defined($plugin->opts->crystal);
-$tool_cmd .= " " . $plugin->opts->coupler if defined($plugin->opts->coupler);
+elsif ($plugin->opts->mode eq "appid") {
+   $tool_cmd = "appli_identication";
+}
 
 printf("Sending command %s to host %s\n", $tool_cmd, $plugin->opts->host) if $plugin->opts->verbose;
 my @outp = $telnet->cmd($tool_cmd);
@@ -625,10 +666,13 @@ elsif ($plugin->opts->mode eq "trunk") {
 elsif ($plugin->opts->mode eq "terminal") {
    ($code, $message, $perf_output) = check_terminals(@outp);
 }
+elsif ($plugin->opts->mode eq "appid") {
+   ($code, $message, $perf_output) = check_appid(@outp);
+}
 
 $plugin->plugin_die($message) if ($code == UNKNOWN);
 
-$message .= " | " . $perf_output;
+$message .= " | " . $perf_output if defined $perf_output;
 $plugin->plugin_exit($code, $message);
 
 
