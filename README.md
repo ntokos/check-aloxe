@@ -5,8 +5,8 @@ It connects (currently only via telnet) to an Alcatel OXE PBX and reports:
  - coupler (i.e. cards) service status for a given crystal number and a user specified list of coupler types or a 
    given coupler number
  - terminal (i.e. phones, faxes etc) status statistics for the PBX or a specific crystal number
- - trunk group channel usage statistics (Free vs non Free channels) for a given trunk group number
- - link channel usage statistics (Free vs non Free channels) for a given pair of crystal number/coupler number
+ - trunk group channel usage statistics (busy vs total channels) for a given trunk group number
+ - link channel usage statistics (busy vs total channels) for a given pair of crystal number/coupler number
 The output includes some basic performance data in format understood by icinga/nagios.
 
 ## Compatibility
