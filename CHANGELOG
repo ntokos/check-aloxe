@@ -8,14 +8,12 @@ Change Log for the check-aloxe plugin:
         - Set a more generic prompt in telnet
 
 1.3     (03 Jul 2020)
-<<<<<<< HEAD
         - Changed output on link and trunk modes to display Busy instead of Free Channels
         - Added perfdata output values for link and trunk modes for creating weathermap
 		  lines in NagVis
 
 2.0     (10 Jul 2020)
 =======
->>>>>>> 3d1cf3a753876a0bf5398cf3a4c59f6e7425f3c5
         - Changed output on link and trunk modes to display Busy instead of Free Channels
         - Added perfdata output values for link and trunk modes for creating weathermap
-		  lines in NagVis
+          lines in NagVis
