@@ -19,6 +19,7 @@
 # Changes:
 # v.2.1:
 #  - added ability to provide telnet credentials through command line
+#  - fixed parsing output of link channel states to accomodate differences in OXE versions
 # v.2.0:
 #  - added mode=appid that displays the Application software identity running on the PBX
 #  - removed overchecking for valid arguments
@@ -512,15 +513,21 @@ sub check_link  {
 
       $f[0] =~ s/(^\s+)|(\s+$)//g;
 
+      shift(@f) if (index($f[0], "Type:") >= 0);
       next if ($f[0] ne "State");
 
       shift(@f);
 
       for my $s (@f) {
+         $s =~ s/\s+//;
+         next if ($s eq "--");
+
          $n_nonfree++ if ($s ne "F");
 
          push(@link_states, $s);
       }
+
+      next if ($#link_states < $n_states);
 
       printf("Added %s link channel states\n", $#link_states + 1 - $n_states) if $plugin->opts->verbose;
 

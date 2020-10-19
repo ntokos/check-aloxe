@@ -18,3 +18,4 @@ Change Log for the check-aloxe plugin:
 
 2.1     (19 Oct 2020)
         - Added ability to provide telnet credentials via command line arguments (issue #1)
+		- Fixed parsing output of link channel states to accomodate differences in OXE versions
