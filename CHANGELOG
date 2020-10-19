@@ -13,7 +13,8 @@ Change Log for the check-aloxe plugin:
 		  lines in NagVis
 
 2.0     (10 Jul 2020)
-=======
-        - Changed output on link and trunk modes to display Busy instead of Free Channels
-        - Added perfdata output values for link and trunk modes for creating weathermap
-          lines in NagVis
+        - Added mode=appid that displays the Application software identity running on the PBX
+        - Removed overchecking for valid arguments
+
+2.1     (19 Oct 2020)
+        - Added ability to provide telnet credentials via command line arguments (issue #1)

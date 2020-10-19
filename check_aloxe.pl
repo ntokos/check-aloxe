@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-###  check_aloxe.pl, version: 2.0, 10 Jul 2020
+###  check_aloxe.pl, version: 2.1, 19 Oct 2020
 # 
 # Copyright: C. Ntokos, UoI NOC, Greece
 #
@@ -17,6 +17,8 @@
 # - crystal topology info for a given PBX
 #
 # Changes:
+# v.2.1:
+#  - added ability to provide telnet credentials through command line
 # v.2.0:
 #  - added mode=appid that displays the Application software identity running on the PBX
 #  - removed overchecking for valid arguments
@@ -31,21 +33,21 @@ use warnings;
 
 
 # PBX telnet credentials
-my $TELNET_USER = 'user';
-my $TELNET_PASS = 'pass';
+my $TELNET_USER = 'mtcl';
+my $TELNET_PASS = 'mtcl';
 
 use Monitoring::Plugin;
 use Net::Telnet ();
 
 use vars qw($VERSION $PROGNAME $verbose $timeout);
 
-$VERSION = '2.0';
+$VERSION = '2.1';
 
 use File::Basename;
 $PROGNAME = basename($0);
 
 
-my $usage = "Usage: %s [-h] [-v] [-t] -H <host> -m <mode>
+my $usage = "Usage: %s [-h] [-v] [-t] -H <host> -u <username> -p <password> -m <mode>
        ([-i <crystal>] [-y <coupler types>] | [-c <coupler num>] [-r <remote pbx description]) |
        [-g <trunk group>]
 ";
@@ -62,21 +64,21 @@ my $help_txt = "
   NOTE: timeout value must be at least 3 secs to allow for minimum telnet timeout of 1 secs
 
     Examples:
-$PROGNAME -H x.x.x.x -m coupler -i 0 -c INTIPA,INTOF_A,PRA2,UA32
+$PROGNAME -H x.x.x.x -u user -p mypass -m coupler -i 0 -c INTIPA,INTOF_A,PRA2,UA32
     Checks coupler status on crystal number 0, for couplers with type INTIPA or INTOF_A
     or PRA2 or UA32 and reports statistics
-$PROGNAME -H x.x.x.x -m coupler -i 0 -y 1
+$PROGNAME -H x.x.x.x -u user -p mypass -m coupler -i 0 -y 1
     Checks coupler status on crystal number 0, coupler number 1 and reports statistics
 
-$PROGNAME -H x.x.x.x -m terminal -i 1
+$PROGNAME -H x.x.x.x -u user -p mypass -m terminal -i 1
     Reports statistics by terminal types for terminals on crystal number 1
-$PROGNAME -H x.x.x.x -m terminal
+$PROGNAME -H x.x.x.x -u user -p mypass -m terminal
     Reports statistics by terminal types for all terminals on the PBX
 
-$PROGNAME -H x.x.x.x -m trunk -g 1
+$PROGNAME -H x.x.x.x -u user -p mypass -m trunk -g 1
     Reports channel statistics for trunk group 1
 
-$PROGNAME -H x.x.x.x -m link -i 0 -c 27 -r 'RPBX (0-19)'
+$PROGNAME -H x.x.x.x -u user -p mypass -m link -i 0 -c 27 -r 'RPBX (0-19)'
     Reports channel statistics for link designated by crystal 0, coupler 27.
     Also display on the result the given description of the remote PBX link info
 ";
@@ -98,6 +100,24 @@ $plugin->add_arg(
            spec => 'host|H=s',
            help => $help_txt,
            required => 1
+);
+
+$help_txt = "-u, --username STRING
+   Username to use when connection to PBX (default is mtcl)";
+
+$plugin->add_arg(
+           spec => 'username|u=s',
+           help => $help_txt,
+           required => 0
+);
+
+$help_txt = "-p, --password STRING
+   Password to use when connection to PBX (default is mtcl)";
+
+$plugin->add_arg(
+           spec => 'password|p=s',
+           help => $help_txt,
+           required => 0
 );
 
 $help_txt = "-m, --mode STRING
@@ -591,6 +611,8 @@ sub check_appid  {
 # Parse arguments and process standard ones (e.g. usage, help, version)
 $plugin->getopts;
 
+$TELNET_USER = $plugin->opts->username if ($plugin->opts->username);
+$TELNET_PASS = $plugin->opts->password if ($plugin->opts->password);
 
 # Check extra command line options
 my $err_message = check_extra_opts();

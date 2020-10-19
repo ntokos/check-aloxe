@@ -37,6 +37,8 @@ Here is a more detailed explanation of the command options and things to be awar
  | Option | Value | Description |
  | :--- | :---: | :--- |
  | `-H,--host` | *IPv4 addr string* | IP address of the PBX management interface |
+ | `-u,--username` | *String* | Username to use when connecting to PBX (default is mtcl) |
+ | `-p,--password` | *String* | Password to use when connecting to PBX (default is mtcl) |
  | `-m,--mode` | *String* | What mode the plugin should run on (i.e. what to check): |
  |   | 'coupler' | Checks the status of couplers in a given crystal number.<br>If you provide a list of coupler types (option `-y`) only those coupler types will be checked.<br>If you provide a coupler number (option `-c`) only that coupler will be checked.<br>Couplers in state 'IN SERVICE' are considered OK, those in state 'OUT OF SERVICE' are reported as CRITICAL and those that are *not* in states similar to 'REG NOT INIT', 'MISS MAO FILE', 'MISS OPS FILE' are reported with WARNING.<br>The plugin output includes only the CRITICAL/WARNING couplers (otherwise it reports total number of OK couplers).<br>The performance data contain status totals per coupler type (value=couplers of this type that are OK;warn=0;crit=0;min=0;max=total couplers of this type) |
  |   | 'link' | Check the channel usage on the link designated by a given crystal/coupler pair (specified via the `-i`, `-c` options) and report Busy vs total channels.<br>A channel state of value different than 'F' is considered Busy.<br>In the current plugin version, there is no way to specify warning/critical thresholds. When *all* link channels are Busy, the plugin will report a WARNING status.<br>You can provide a text (via the `-r-` option) describing the PBX on the otherside of the link that will be added on the plugin output (useful as a place to store the crystal/coupler pair of the remote PBX).<br>The performance data contain the number of *non* Free channels (value=total non Free channels;warn=total channels;crit=0;min=0;max=total channels). It also contains in and out parameters (same values) so you can create weathermap lines in Nagvis. |
@@ -58,45 +60,45 @@ Note that on some PBXs (with old CPUs) the telnet session might not respond in t
 ### Example runs
 - Check couplers for coupler types in specified list on a given crystal:
 ```
-check_aloxe.pl -H 10.1.1.1 -m coupler -i 0 -y "CPU6,CPU7_STEP2,INTOF_A,INTOF_B,INTIPA,PRA2,UA32,Z32,Z24,Z24_2,Z12,Z12_2,UAZP,NDDI"
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m coupler -i 0 -y "CPU6,CPU7_STEP2,INTOF_A,INTOF_B,INTIPA,PRA2,UA32,Z32,Z24,Z24_2,Z12,Z12_2,UAZP,NDDI"
 Couplers OK - All 19 couplers OK | CPU7_STEP2=2;0;0;0;2 INTIPA=1;0;0;0;1 INTOF_A=6;0;0;0;6 PRA2=10;0;0;0;10
 
-check_aloxe.pl -H 10.1.1.1 -m coupler -i 3 -y "CPU6,CPU7_STEP2,INTOF_A,INTOF_B,INTIPA,PRA2,UA32,Z32,Z24,Z24_2,Z12,Z12_2,UAZP,NDDI"                 
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m coupler -i 3 -y "CPU6,CPU7_STEP2,INTOF_A,INTOF_B,INTIPA,PRA2,UA32,Z32,Z24,Z24_2,Z12,Z12_2,UAZP,NDDI"                 
 Couplers CRITICAL -  3-4-Z24: OFF | INTOF_B=1;0;0;0;1 UA32=1;0;0;0;1 Z24=0;0;0;0;1 
 ```
 - Check coupler on a given crystal/coupler numbers pair:
 ```
-check_aloxe.pl -H 10.1.1.1 -m coupler -i 0 -c 26
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m coupler -i 0 -c 26
 Couplers OK - All 1 couplers OK | INTOF_A=1;0;0;0;1
 ```
 - Check channel usage on link designated by a given crystal/coupler numbers pair
 ```
-check_aloxe.pl -H 10.1.1.1 -m link -i 0 -c 11
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m link -i 0 -c 11
 Link from: (0-11) OK - 28 Free channels | NonFree=2;30;0;0;30 in=2;0;0;0;30 out=2;0;0;0;30
 ```
 - Check channel usage link designated by a given crystal/coupler numbers pair, remote bpx has the given description
 ```
-check_aloxe.pl -H 10.1.1.1 -m link -i 0 -c 11 -r "mypbx2 (0-26)"
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m link -i 0 -c 11 -r "mypbx2 (0-26)"
 Link from: (0-11) to: mypbx2 (0-26) OK - 28 Free channels | NonFree=2;30;0;0;30 in=2;0;0;0;30 out=2;0;0;0;30
 ```
 - Check terminals status on the PBX
 ```
-check_aloxe.pl -H 10.1.1.1 -m terminal
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m terminal
 Terminals OK - 6 types, 677 total terminals, 581 OK, 96 not OK | 4010-VLE_3=69;0;0;0;83 4012-LE=187;0;0;0;227 4019=88;0;0;0;108 4020-LE_3G=37;0;0;0;42 4034-MR2=56;0;0;0;62 AUTPOS=144;0;0;0;155
 ```
 - Check terminals status on the PBX only on a given crystal
 ```
-check_aloxe.pl -H 10.1.1.1 -m terminal -i 1
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m terminal -i 1
 Terminals OK - 5 types, 262 total terminals, 232 OK, 30 not OK | 4012-LE=79;0;0;0;96 4019=19;0;0;0;26 4020-LE_3G=18;0;0;0;21 4034-MR2=36;0;0;0;38 AUTPOS=80;0;0;0;81
 ```
 - Check channel usage statistics on trunk group number 1
 ```
-check_aloxe.pl -H 10.1.1.1 -m trunk -g 1
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m trunk -g 1
 TG 1: PSTN-OUT OK - 20 Free channels | NonFree=10;30;0;0;30 in=10;0;0;0;30 out=10;0;0;0;30
 ```
 - Get the application software identity of the PBX
 ```
-check_aloxe.pl -H 10.1.1.1 -m appid
+check_aloxe.pl -H 10.1.1.1 -u user -p mypass -m appid
 AppId OK - CPU:c7s2, release:8.0, delivery:g1.302, patch:8 (8.0-g1.302-8)
 ```
 
@@ -110,6 +112,9 @@ object Host "mypbx1" {
 
    address = "pbx ip address"
 
+   vars.cli_user = "myuser"        # in case you use different credentials per PBX
+   vars.cli_pass = "mypass"
+   
    vars.monitorcouplers = "CPU6,CPU7_STEP2,INTOF_A,INTOF_B,INTIPA,PRA2,UA32,NDDI"    # add more types
 
    vars.monitorterminals = true
@@ -151,6 +156,8 @@ object CheckCommand "aloxe" {
     command = [ LocalPluginDir + "/check_aloxe.pl" ]
     arguments = {
             "--host" = "$aloxe_address$"
+            "--username" = "$aloxe_username$"
+            "--password" = "$aloxe_password$"
             "--mode" = "$aloxe_mode$"
             "--crystal" = "$aloxe_crystal$"
             "--coupler" = "$aloxe_coupler$"
@@ -161,6 +168,8 @@ object CheckCommand "aloxe" {
     }
  
     vars.aloxe_address = "$address$"
+    vars.aloxe_username = "mtcl"         # if you have same credentials on all your PBXs
+    vars.aloxe_password = "mypass"
     vars.aloxe_mode = "coupler"
     vars.aloxe_timeout = 20
 }
@@ -176,6 +185,9 @@ apply Service "crystal-" for (crystal => c_conf in host.vars.crystals) {
  
    check_command = "aloxe"
  
+   if (vars.cli_user) { vars.aloxe_username = vars.cli_user }
+   if (vars.cli_pass) { vars.aloxe_password = vars.cli_pass }
+
    vars.aloxe_mode = "coupler"
    vars.aloxe_crystal = crystal
    vars.aloxe_ctype = host.vars.monitorcouplers
@@ -190,6 +202,9 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
  
    check_command = "aloxe"
  
+   if (vars.cli_user) { vars.aloxe_username = vars.cli_user }
+   if (vars.cli_pass) { vars.aloxe_password = vars.cli_pass }
+
    vars.aloxe_mode = "trunk"
    vars.aloxe_trkgroup = tgroup
  
@@ -203,6 +218,9 @@ apply Service "trunk-group-" for (tgroup => t_conf in host.vars.trkgroups) {
  
    check_command = "aloxe"
  
+   if (vars.cli_user) { vars.aloxe_username = vars.cli_user }
+   if (vars.cli_pass) { vars.aloxe_password = vars.cli_pass }
+
    vars.aloxe_mode = "link"
    vars.aloxe_crystal = l_conf.crystal
    vars.aloxe_coupler = l_conf.coupler
@@ -218,6 +236,9 @@ apply Service "terminals" {
  
    check_command = "aloxe"
  
+   if (vars.cli_user) { vars.aloxe_username = vars.cli_user }
+   if (vars.cli_pass) { vars.aloxe_password = vars.cli_pass }
+
    vars.aloxe_mode = "terminal"
  
    assign where host.address && host.vars.monitorterminals
@@ -230,6 +251,9 @@ apply Service "appl-id" {
  
    check_command = "aloxe"
  
+   if (vars.cli_user) { vars.aloxe_username = vars.cli_user }
+   if (vars.cli_pass) { vars.aloxe_password = vars.cli_pass }
+
    vars.aloxe_mode = "appid"
  
    assign where host.address && host.vars.monitorrelease
